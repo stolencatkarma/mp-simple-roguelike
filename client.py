@@ -16,6 +16,8 @@ from src.player import Player
 
 import pyglet
 import glooey
+from pyglet.window import key as KEY
+from pyglet import clock
 
 
 class MapUtils:
@@ -40,43 +42,14 @@ class MapUtils:
 class Client(MastermindClientTCP): # extends MastermindClientTCP
     def __init__(self, name):
         MastermindClientTCP.__init__(self)
-        self.player = Player(str(name)) # recieves updates from server. the player and all it's stats.
+        self.player = Player(9999,9999, str(name)) # recieves updates from server. the player and all it's stats.
         self.chunk = None
-
-
-    def draw_map(self, stdscr):
-        #TODO: lerp the positions of creatures from one frame to the next.
-
-
-        for i, x in self.chunk.items():
-            for j, terrain in x.items():
-                (j, i, terrain.symbol)
-      
-        stdscr.refresh()
-        #stdscr.getkey()
-        # blit the map
-      
-        # blit objects, then items, then creatures, then the player, 
-           
-            # then blit weather. Weather is the only thing above players and creatures.
-            #TODO: blit weather
-
-
-if __name__ == "__main__":
-        
-        '''parser = argparse.ArgumentParser(description='Cataclysm LD Client', epilog="Please start the client with a first and last name for your character.")
-        parser.add_argument('--host', metavar='Host', help='Server host', default='localhost')
-        parser.add_argument('-p', '--port', metavar='Port', type=int, help='Server port', default=6317)
-        parser.add_argument('name', help='Player\'s name')
-        
-        args = parser.parse_args()
-        ip = args.host
-        port = args.port'''
 
         window = pyglet.window.Window(854, 480)
         gui = glooey.Gui(window)
         pyglet.resource.path = ['tiles','tiles/background']
         pyglet.resource.reindex()
+     
         bg = glooey.Background()
         bg.set_appearance(
             center=pyglet.resource.texture('center.png'),
@@ -90,42 +63,78 @@ if __name__ == "__main__":
             bottom_right=pyglet.resource.texture('bottom_right.png')
             )
         gui.add(bg)
-        pyglet.app.run() 
+
+        
+
+        @window.event
+        def on_key_press(symbol, modifiers):
+            if symbol == KEY.RETURN:
+                print('return')
+     
+        
+
+    
+
+        
+
+    def draw_map(self):
+        #TODO: lerp the positions of creatures from one frame to the next.
+
+
+        for i, x in self.chunk.items():
+            for j, terrain in x.items():
+                (j, i, terrain.symbol)
+      
+        # blit the map
+      
+        # blit objects, then items, then creatures, then the player, 
+           
+        # then blit weather. Weather is the only thing above players and creatures.
+
+
+
+if __name__ == "__main__":
+        
+        parser = argparse.ArgumentParser(description='Cataclysm LD Client', epilog="Please start the client with a first and last name for your character.")
+        parser.add_argument('--host', metavar='Host', help='Server host', default='localhost')
+        parser.add_argument('-p', '--port', metavar='Port', type=int, help='Server port', default=6317)
+        parser.add_argument('name', help='Player\'s name')
+        
+        args = parser.parse_args()
+        ip = args.host
+        port = args.port
+
+        
 
         client = Client(args.name)
         client.connect(ip, port)
+
+        
+
         command = Command(client.player.name, 'login', ['password'])
         client.send(command)
         command = Command(client.player.name, 'request_map')
         client.send(command)
         command = None
-        last_time = time.time()
-        while True:
-            try:
-                # if we recieve an update from the server process it. do this first.
-                next_update = client.receive(False)
-                if(next_update is not None):
-                    print('--next_update--') # we recieved a message from the server. let's process it.
-                    print(type(next_update))
-                    if(isinstance(next_update, Player)):
-                        #print('got playerupdate')
-                        client.player = next_update # client.player is updated
-                    elif(isinstance(next_update, dict)): 
-                        last_time = time.time() # save the last time we got a localmap update
-                        client.chunk = next_update
-                        client.draw_map() # update after everything is complete.
-                else:
-                    command = Command(client.player.name, 'request_map')
-                    client.send(command)
-                
-                
+        
+        def update_map_and_client(dt, client):
+            next_update = client.receive(False)
+            
+            if(next_update is not None):
+                if(isinstance(next_update, Player)):
+                    client.player = next_update # self.player is updated
+                    print('updated player')
+                elif(isinstance(next_update, dict)): 
+                    client.chunk = next_update
+                    print('updated map')
 
-            except KeyboardInterrupt:
-                print('cleaning up before exiting.')
-                print('done cleaning up.')
-                sys.exit()
-            except Exception as e:
-                print('!! Emergency Exit due to Server Exception. !!')
-                print(e)
-                print()
-                sys.exit()
+        def request_map(dt):
+            command = Command(client.player.name, 'request_map')
+            client.send(command)
+            command = None
+
+        clock.schedule(update_map_and_client, client)
+        #clock.schedule_interval(request_map, 0.05)
+        
+        pyglet.app.event_loop.run() # main event loop starts here.
+        

@@ -3,8 +3,7 @@
   "overmap_terrain": "city_road",
   "fill_terrain": "t_pavement",
   "comment": "13x13 city road with sidewalks",
-  "floors": {
-    "0": [
+  "layout":[
       "SSRRRRCRRRRSS",
       "SSRRRRCRRRRSS",
       "SSRRRRCRRRRSS",
@@ -18,8 +17,7 @@
       "SSRRRRCRRRRSS",
       "SSRRRRCRRRRSS",
       "SSRRRRCRRRRSS"
-    ]
-  },
+    ],
   "terrain": {
     "S": "t_sidewalk",
     "R": "t_pavement",

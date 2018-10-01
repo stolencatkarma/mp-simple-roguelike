@@ -3,8 +3,7 @@
   "overmap_terrain": "commercial",
   "fill_terrain": "t_floor",
   "comment": "basic commercial building",
-  "floors": {
-    "0": [
+  "layout":[
       "PPPPPPPPPPPPP",
       "PWIWWWWWIWWWP",
       "PW   W     WP",
@@ -17,8 +16,7 @@
       "PW         WP",
       "PWWWILIWWWWWP",
       "PPPPPPPPPPPPP"
-    ]
-  },
+    ],
   "terrain": {
     "T": "t_tree_apple",
     "S": "t_shrub",

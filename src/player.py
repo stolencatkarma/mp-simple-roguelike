@@ -1,10 +1,9 @@
-from .creature import Creature
+from src.creature import Creature
 
 class Player(Creature):
-    def __init__(self, name='JohnDoe'):
-        Creature.__init__(self,2,2)
+    def __init__(self, x, y, name='Andrew'):
+        Creature.__init__(self,x,y)
         self.name = name
-        self.symbol = '@'
     
     def __str__(self):
         return self.name

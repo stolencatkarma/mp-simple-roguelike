@@ -3,8 +3,7 @@
   "overmap_terrain": "industrial",
   "fill_terrain": "t_metal_floor",
   "comment": "basic industrial building",
-  "floors": {
-    "0": [
+  "layout": [
       "PPPPPPPPPPPPP",
       "PWWLWWWWWWWWP",
       "PWr rrrrrrrWP",
@@ -17,8 +16,7 @@
       "PW         WP",
       "PWWWWLLWWWWWP",
       "PPPPPPPPPPPPP"
-    ]
-  },
+    ],
   "terrain": {
     "T": "t_tree_apple",
     "S": "t_shrub",

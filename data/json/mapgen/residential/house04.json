@@ -5,22 +5,7 @@
   "comment": "multi-story house - fill_terrain is the base terrain for ' ' (empty space) groups are 'small residential', 'medium residential', 'large residential', 'small, medium, large commercial', 'small, medium, large industrial'",
   "comment2": "overmap_terrian can be residential, commerical, industrial or a point of interest like police and fire or govt buildings which override general RCI.",
   "comment3": "items will be generated from loot tables depending on the furniture.",
-  "floors": {
-    "1": [
-      ".............",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".R>RRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      ".RRRRRRRRRR..",
-      "............."
-    ],
-    "0": [
+  "layout":[
       "GGGGGGGGGGGGG",
       "GWIWWWWWIWWGG",
       "GWt eWfbbdWGG",
@@ -34,21 +19,6 @@
       "GWWWILIWWWWGG",
       "GGGGGPGGGGGGG"
     ],
-    "-1": [
-      "             ",
-      " WWWWWWWWWWW ",
-      " W         W ",
-      " W         W ",
-      " W         W ",
-      " W        uW ",
-      " W^   O   cW ",
-      " W        jW ",
-      " W        fW ",
-      " W        gW ",
-      " WWWWWWWWWWW ",
-      "             "
-      ]
-  },
   "terrain": {
     "T": "t_tree_apple",
     "S": "t_shrub",

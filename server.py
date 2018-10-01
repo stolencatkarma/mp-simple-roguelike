@@ -34,7 +34,7 @@ class Server(MastermindServerTCP):
                         print('player exists. loading.')
                     else:
                         print('player doesnt exist yet.')
-                        tmp_player = Player(str(data.ident))
+                        tmp_player = Player(2,2,str(data.ident))
                         self.worldmap.add_player_to_worldmap(tmp_player, Position(2,2))
                         
 
@@ -50,6 +50,7 @@ class Server(MastermindServerTCP):
 
             if(data.command == 'request_map'):
                 # find the chunk the player is on and send it to them.
+                print('player wants a map update.')
                 tmp_chunk = self.worldmap.get_chunk_by_player(data.ident)
                 player_map = tmp_chunk.map
 
@@ -159,8 +160,7 @@ class Server(MastermindServerTCP):
         # now that we've processed what everything wants to do we can return.
 
     def generate_and_apply_city_layout(self, city_size):
-        #city_size = 1
-        city_layout = self.worldmap.generate_city(city_size)
+        city_layout = self.worldmap.generate_city(city_size) 
         # for every 1 city size it's 12 tiles across and high
         for j in range(city_size*12):
             for i in range(city_size*12):
@@ -219,15 +219,16 @@ if __name__ == "__main__":
     server = Server()
     server.connect(ip, port)
     server.accepting_allow()
-
+    server.generate_and_apply_city_layout(1)
     
     time_offset = 0.25 # 0.5 is twice as fast, 2.0 is twice as slow
     last_turn_time = time.time()
-    #server.generate_and_apply_city_layout(2)
+   
 
     print('Started up Mutiplayer Roguelike Work in Progress with no definitive Title.. Yet...')
     while True:
         try:
+            
             while(time.time() - last_turn_time < time_offset): # try to keep up with the time offset but never go faster than it.
                 time.sleep(.01)
             server.calendar.advance_time_by_x_seconds(1) # a turn is one second.
