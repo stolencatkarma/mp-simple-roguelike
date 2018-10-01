@@ -73,10 +73,6 @@ class Client(MastermindClientTCP): # extends MastermindClientTCP
      
         
 
-    
-
-        
-
     def draw_map(self):
         #TODO: lerp the positions of creatures from one frame to the next.
 
@@ -117,7 +113,7 @@ if __name__ == "__main__":
         client.send(command)
         command = None
         
-        def update_map_and_client(dt, client):
+        def check_messages_from_server(dt, client):
             next_update = client.receive(False)
             
             if(next_update is not None):
@@ -128,13 +124,8 @@ if __name__ == "__main__":
                     client.chunk = next_update
                     print('updated map')
 
-        def request_map(dt):
-            command = Command(client.player.name, 'request_map')
-            client.send(command)
-            command = None
-
-        clock.schedule(update_map_and_client, client)
-        #clock.schedule_interval(request_map, 0.05)
+        clock.schedule(check_messages_from_server, client)
+        
         
         pyglet.app.event_loop.run() # main event loop starts here.
         

@@ -53,8 +53,6 @@ class Server(MastermindServerTCP):
                 print('player wants a map update.')
                 tmp_chunk = self.worldmap.get_chunk_by_player(data.ident)
                 player_map = tmp_chunk.map
-
-
                 self.callback_client_send(connection_object, player_map)
 
            
@@ -134,7 +132,6 @@ class Server(MastermindServerTCP):
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y-1))):
                         creature.position = Position(creature.position.x, creature.position.y-1)
                     creature.command_queue.remove(action) # remove the action after we process it.
-           
 
     # this function handles overseeing all creature movement, attacks, and interactions
     def compute_turn(self):
@@ -155,8 +152,10 @@ class Server(MastermindServerTCP):
             if(len(creature.command_queue) > 0): # as long as there at least one we'll pass it on and let the function handle how many actions they can take.
                 print('doing actions for: ' + str(creature.name))
                 self.process_creature_command_queue(creature)
-                 
-
+        
+        # we need a way to auto update the players each turn
+            
+            
         # now that we've processed what everything wants to do we can return.
 
     def generate_and_apply_city_layout(self, city_size):
