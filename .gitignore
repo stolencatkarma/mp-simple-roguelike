@@ -1,0 +1,6 @@
+src/unused/tiles_by_ident.zip
+*.pyc
+src/unused/*
+*.chunk
+*.credits
+*.bmp
