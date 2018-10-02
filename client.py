@@ -100,13 +100,9 @@ if __name__ == "__main__":
         ip = args.host
         port = args.port
 
-        
-
         client = Client(args.name)
         client.connect(ip, port)
-
-        
-
+       
         command = Command(client.player.name, 'login', ['password'])
         client.send(command)
         command = Command(client.player.name, 'request_map')
@@ -123,6 +119,9 @@ if __name__ == "__main__":
                 elif(isinstance(next_update, dict)): 
                     client.chunk = next_update
                     print('updated map')
+            else: # no messages waiting. request update
+                command = Command(client.player.name, 'request_map')
+                client.send(command)
 
         clock.schedule(check_messages_from_server, client)
         

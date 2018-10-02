@@ -32,9 +32,10 @@ class Server(MastermindServerTCP):
                     tmp_player = self.worldmap.get_player(data.ident) # by 'name'
                     if(tmp_player is not None): # player exists
                         print('player exists. loading.')
+                        player.connection_object = connection_object
                     else:
                         print('player doesnt exist yet.')
-                        tmp_player = Player(2,2,str(data.ident))
+                        tmp_player = Player(2,2,connection_object, str(data.ident))
                         self.worldmap.add_player_to_worldmap(tmp_player, Position(2,2))
                         
 
@@ -152,6 +153,8 @@ class Server(MastermindServerTCP):
             if(len(creature.command_queue) > 0): # as long as there at least one we'll pass it on and let the function handle how many actions they can take.
                 print('doing actions for: ' + str(creature.name))
                 self.process_creature_command_queue(creature)
+                if(isinstance(creature, Player)):
+                    self.callback_client_send(creature.connection_object, self.worldmap.get_chunk_by_position(creature.position))
         
         # we need a way to auto update the players each turn
             
