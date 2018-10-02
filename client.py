@@ -42,12 +42,19 @@ class MapUtils:
 class Client(MastermindClientTCP): # extends MastermindClientTCP
     def __init__(self, name):
         MastermindClientTCP.__init__(self)
-        self.player = Player(9999,9999, str(name)) # recieves updates from server. the player and all it's stats.
+        ''' when we get an update from the server we update these values from the parsed chunk. '''
+        self.name = ''
+        self.player = None
         self.chunk = None
+        self.map = None
+        self.creatures = None
+        self.objects = None
+
+
 
         window = pyglet.window.Window(854, 480)
         gui = glooey.Gui(window)
-        pyglet.resource.path = ['tiles','tiles/background']
+        pyglet.resource.path = ['tiles','tiles/background','tiles/monsters','tiles/terrain']
         pyglet.resource.reindex()
      
         bg = glooey.Background()
@@ -75,17 +82,22 @@ class Client(MastermindClientTCP): # extends MastermindClientTCP
 
     def draw_map(self):
         #TODO: lerp the positions of creatures from one frame to the next.
-
-
-        for i, x in self.chunk.items():
-            for j, terrain in x.items():
-                (j, i, terrain.symbol)
-      
-        # blit the map
-      
+        #TODO: use the last chunk compared to this chunk to lerp.
+        
         # blit objects, then items, then creatures, then the player, 
            
         # then blit weather. Weather is the only thing above players and creatures.
+        pass
+    
+    def parse_chunk_data(self):
+        self.map = self.chunk.map
+        self.creatures = self.chunk.creatures
+        self.objects = self.chunk.objects
+        self.players = self.chunk.players
+        for player in self.players:
+            if(player.name == self.name):
+                self.player = player
+
 
 
 
@@ -101,15 +113,16 @@ if __name__ == "__main__":
         port = args.port
 
         client = Client(args.name)
+        _name = input('What is your name?')
         client.connect(ip, port)
        
-        command = Command(client.player.name, 'login', ['password'])
+        command = Command(_name, 'login', ['password'])
         client.send(command)
-        command = Command(client.player.name, 'request_map')
+        command = Command(_name, 'request_chunk')
         client.send(command)
         command = None
         
-        def check_messages_from_server(dt, client):
+        def check_messages_from_server(dt):
             next_update = client.receive(False)
             
             if(next_update is not None):
@@ -118,12 +131,17 @@ if __name__ == "__main__":
                     print('updated player')
                 elif(isinstance(next_update, dict)): 
                     client.chunk = next_update
-                    print('updated map')
-            else: # no messages waiting. request update
-                command = Command(client.player.name, 'request_map')
-                client.send(command)
+                    self.parse_chunk_data()
+                    print('updated chunk')
+            
+            return
+        
+        def ping(dt):
+            command = Command(client.player.name, 'ping')
+            client.send(command)
 
-        clock.schedule(check_messages_from_server, client)
+        clock.schedule_interval(check_messages_from_server, 0.25)
+        clock.schedule_interval(ping, 30.0)
         
         
         pyglet.app.event_loop.run() # main event loop starts here.

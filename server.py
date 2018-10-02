@@ -17,12 +17,13 @@ from Mastermind._mm_server import MastermindServerTCP
 
 class Server(MastermindServerTCP):
     def __init__(self):
-        MastermindServerTCP.__init__(self, 0.25, 0.25, 300.0)
+        MastermindServerTCP.__init__(self, 0.5, 0.5, 60.0)
         self.calendar = Calendar(0, 0, 0, 0, 0, 0) # all zeros is the epoch
         self.worldmap = Worldmap(13) # create this many chunks in x and y for genning the world.
+        self.connected_players = list()
 
     def callback_client_handle(self, connection_object, data):
-        #print("Server: Recieved data \""+str(data)+"\" from client \""+str(connection_object.address)+"\".")
+        # print("Server: Recieved data \""+str(data)+"\" from client \""+str(connection_object.address)+"\".")
         # use the data to determine what player is giving the command and if they are logged in yet.
 
         if(isinstance(data, Command)): # the data we recieved was a command. process it.
@@ -32,12 +33,10 @@ class Server(MastermindServerTCP):
                     tmp_player = self.worldmap.get_player(data.ident) # by 'name'
                     if(tmp_player is not None): # player exists
                         print('player exists. loading.')
-                        player.connection_object = connection_object
                     else:
                         print('player doesnt exist yet.')
-                        tmp_player = Player(2,2,connection_object, str(data.ident))
+                        tmp_player = Player(2,2, str(data.ident))
                         self.worldmap.add_player_to_worldmap(tmp_player, Position(2,2))
-                        
 
                     print('Player ' + str(data.ident) + ' entered the world at position ' + str(tmp_player.position))
                     self.callback_client_send(connection_object, tmp_player)
@@ -49,12 +48,11 @@ class Server(MastermindServerTCP):
             if(data.command == 'move'):
                tmp_player.command_queue.append(Action(tmp_player, 'move', [data.args[0]]))
 
-            if(data.command == 'request_map'):
+            if(data.command == 'request_chunk'):
                 # find the chunk the player is on and send it to them.
                 print('player wants a map update.')
                 tmp_chunk = self.worldmap.get_chunk_by_player(data.ident)
-                player_map = tmp_chunk.map
-                self.callback_client_send(connection_object, player_map)
+                self.callback_client_send(connection_object, tmp_chunk)
 
            
             if(data.command == 'move_item'):
@@ -65,22 +63,11 @@ class Server(MastermindServerTCP):
                 _from_list = [] # the object list that contains the item. parse the type and fill this properly.
                 _to_list = data.args[2] # the list the item will end up. passed from command.
                 _position = Position(data.args[3], data.args[4]) # pass the position even if we may not need it.
-
-                ### possible move types ###
-                # creature(held) to creature(held) (give to another player)
-                # creature(held) to position(ground) (drop)
-                # creature(held) to bodypart (equip)
-                # bodypart to creature(held) (unequip)
-                # bodypart to position (drop)
-
-                # position to creature(held) (pick up from ground)
-                # position to bodypart (equip from ground)
-                # position to position (move from here to there)
-
-                # creature to blueprint (fill blueprint)
-
-                # blueprint to position (empty blueprint on ground)
-                # blueprint to creature (grab from blueprint)
+            
+            if(data.command == 'ping'):
+                # pong - this keeps the client connected if they haven't done anything in awhile and there's been no chunk updates.
+                print('pong')
+                
 
         return super(Server,self).callback_client_handle(connection_object,data)
 
@@ -94,6 +81,7 @@ class Server(MastermindServerTCP):
 
     def callback_disconnect_client(self, connection_object):
         print("Server: Client from \""+str(connection_object.address)+"\" disconnected.")
+
         return super(Server, self).callback_disconnect_client(connection_object)
 
     def process_creature_command_queue(self, creature):
@@ -140,8 +128,8 @@ class Server(MastermindServerTCP):
         creatures_to_compute = list()
         for _, x in self.worldmap.WORLDMAP.items():
             for _, chunk in x.items(): 
-                for i, x in chunk.map.items():
-                    for j, terrain in x.items():
+                for _, x in chunk.map.items():
+                    for _, terrain in x.items():
                         terrain.light_levels = 1 # reset light levels.
                 for creature in chunk.players:
                     creatures_to_compute.append(creature)
@@ -153,11 +141,7 @@ class Server(MastermindServerTCP):
             if(len(creature.command_queue) > 0): # as long as there at least one we'll pass it on and let the function handle how many actions they can take.
                 print('doing actions for: ' + str(creature.name))
                 self.process_creature_command_queue(creature)
-                if(isinstance(creature, Player)):
-                    self.callback_client_send(creature.connection_object, self.worldmap.get_chunk_by_position(creature.position))
         
-        # we need a way to auto update the players each turn
-            
             
         # now that we've processed what everything wants to do we can return.
 

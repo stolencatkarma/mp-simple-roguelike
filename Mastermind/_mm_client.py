@@ -1,9 +1,9 @@
 import socket
 import select
 
-from . import _mm_netutil as netutil
-from ._mm_constants import *
-from ._mm_errors import *
+import Mastermind._mm_netutil as netutil
+from Mastermind._mm_constants import *
+from Mastermind._mm_errors import *
 
 class MastermindClientBase(object):
     def __init__(self, connection_type, timeout_connect, timeout_receive):

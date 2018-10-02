@@ -1,8 +1,7 @@
-try:    import cPickle as pickle #Only present in Python 2.*; Python 3 automatically imports the
-except: import  pickle as pickle #new equivalent of cPickle, if it's available.
+import pickle
 import zlib
 
-from ._mm_constants import *
+from Mastermind._mm_constants import MM_UDP, MM_TCP, MM_MAX
 
 def packet_send(socket,protocol_and_udpaddress, data,compression): #E.g.: =(MM_TCP,None)
     if   compression ==  False: compression = 0

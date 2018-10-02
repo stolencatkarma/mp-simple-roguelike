@@ -71,8 +71,8 @@ class Worldmap:
     
     def get_all_chunks(self):
         chunks = list()
-        for i, x in self.WORLDMAP.items():
-            for j, chunk in x.items(): 
+        for _, x in self.WORLDMAP.items():
+            for _, chunk in x.items(): 
                 chunks.append(chunk)
         return chunks
 
@@ -170,9 +170,9 @@ class Worldmap:
 
         chunk = self.get_chunk_by_position(position)
 
-        for i, _x in chunk.map.items():
+        for _, x in chunk.map.items():
             #print(_x)
-            for j, terrain in _x.items(): 
+            for _, terrain in x.items(): 
                 #print(terrain.position)
                 if(terrain.position == position):
                     return terrain
