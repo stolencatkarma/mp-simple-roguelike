@@ -42,20 +42,30 @@ class MapUtils:
 class Client(MastermindClientTCP): # extends MastermindClientTCP
     def __init__(self, name):
         MastermindClientTCP.__init__(self)
-        ''' when we get an update from the server we update these values from the parsed chunk. '''
-        self.name = ''
+        pyglet.resource.path = ['tiles','tiles/background','tiles/monsters','tiles/terrain']
+        pyglet.resource.reindex()
+        ######################################################################################
+        ## when we get an update from the server we update these values from the parsed chunk.
+        self.name = name
+        self.chunk_size = (51,27)
         self.player = None
         self.chunk = None
         self.map = None
         self.creatures = None
         self.objects = None
+        self.map_grid = glooey.Grid(self.chunk_size[1], self.chunk_size[0], 16, 16) # chunk_size + tilemap size
+        self.map_grid.set_left_padding(16) # for the border.
+        self.map_grid.set_top_padding(16)
+                
+        for i in range(self.chunk_size[1]): # glooey uses y,x for grids from the top left.
+            for j in range(self.chunk_size[0]):
+                self.map_grid.add(i, j, glooey.images.Image(pyglet.resource.texture('t_grass.png'))) # before we get an update we need to init the map with grass.
 
-
+        ######################################################################################
 
         window = pyglet.window.Window(854, 480)
         gui = glooey.Gui(window)
-        pyglet.resource.path = ['tiles','tiles/background','tiles/monsters','tiles/terrain']
-        pyglet.resource.reindex()
+        
      
         bg = glooey.Background()
         bg.set_appearance(
@@ -70,33 +80,67 @@ class Client(MastermindClientTCP): # extends MastermindClientTCP
             bottom_right=pyglet.resource.texture('bottom_right.png')
             )
         gui.add(bg)
-
+        gui.add(self.map_grid)
         
 
         @window.event
         def on_key_press(symbol, modifiers):
             if symbol == KEY.RETURN:
                 print('return')
-     
-        
 
-    def draw_map(self):
-        #TODO: lerp the positions of creatures from one frame to the next.
-        #TODO: use the last chunk compared to this chunk to lerp.
+    def convert_position_to_local_coords(self, position):
+        x = position.x
+        y = position.y
+
+        while x >= self.chunk_size[0]:
+            x = x - self.chunk_size[0]
+        while y >= self.chunk_size[1]:
+            y = y - self.chunk_size[1]
         
-        # blit objects, then items, then creatures, then the player, 
-           
-        # then blit weather. Weather is the only thing above players and creatures.
-        pass
+        return (x,y)
+
+    def update_map(self):
+        if(self.map is not None):
+            for i in range(self.chunk_size[0]):
+                for j in range(self.chunk_size[1]):
+                    self.map_grid[j,i].set_image(pyglet.resource.texture(self.map[i][j].ident + '.png'))
+
+            for furniture in self.furnitures:
+                self.map_grid[j,i].Image = pyglet.resource.texture(furniture.ident)
+
+            for creature in self.creatures:
+                self.map_grid[j,i].Image = pyglet.resource.texture(creature.ident)
+            for player in self.players:
+                print('printing player')
+                i, j = self.convert_position_to_local_coords(player.position)
+                self.map_grid[j,i].set_image(pyglet.resource.texture(player.ident))
+            
+            #self.map_grid[j,i]._draw()
+
+                    
+        else:
+            print('had no map to draw')
+
+            #TODO: lerp the positions of creatures from one frame to the next.
+            #TODO: use the last ch_gridmpared to this chunk to lerp.
+            
+            # blit then items, then creatures, then the player, 
+            
+            # then blit weather. Weather is the only thing above players and creatures.
+            
     
     def parse_chunk_data(self):
         self.map = self.chunk.map
         self.creatures = self.chunk.creatures
-        self.objects = self.chunk.objects
+        self.furnitures = self.chunk.furnitures
         self.players = self.chunk.players
         for player in self.players:
+            #print(player.name)
             if(player.name == self.name):
                 self.player = player
+                return
+        else:
+            print('couldn\'t find player in self.map')
 
 
 
@@ -113,12 +157,11 @@ if __name__ == "__main__":
         port = args.port
 
         client = Client(args.name)
-        _name = input('What is your name?')
         client.connect(ip, port)
        
-        command = Command(_name, 'login', ['password'])
+        command = Command(args.name, 'login', ['password'])
         client.send(command)
-        command = Command(_name, 'request_chunk')
+        command = Command(args.name, 'request_chunk')
         client.send(command)
         command = None
         
@@ -129,19 +172,19 @@ if __name__ == "__main__":
                 if(isinstance(next_update, Player)):
                     client.player = next_update # self.player is updated
                     print('updated player')
-                elif(isinstance(next_update, dict)): 
+                elif(isinstance(next_update, Chunk)): 
                     client.chunk = next_update
-                    self.parse_chunk_data()
+                    client.parse_chunk_data()
+                    client.update_map()
                     print('updated chunk')
-            
-            return
+           
         
         def ping(dt):
             command = Command(client.player.name, 'ping')
             client.send(command)
 
         clock.schedule_interval(check_messages_from_server, 0.25)
-        clock.schedule_interval(ping, 30.0)
+        clock.schedule_interval(ping, 30.0) # our keep-alive event. without this the server would disconnect if we don't send data within the timeout for the server.
         
         
         pyglet.app.event_loop.run() # main event loop starts here.

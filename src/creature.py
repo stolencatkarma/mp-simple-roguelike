@@ -13,6 +13,7 @@ class Creature:
         self.stats['perception'] = 10
         self.stats['constitution'] = 10
         self.position = Position(x,y)
+        self.ident = 'player_male.png' # the resource to use for this creature.
         
         self.weapon = None
         self.armor = None

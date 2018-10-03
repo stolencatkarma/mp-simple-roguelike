@@ -101,11 +101,11 @@ class Server(MastermindServerTCP):
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y+1))):
                         creature.position = Position(creature.position.x, creature.position.y+1)
                     creature.command_queue.remove(action) # remove the action after we process it.
-                if(action.args[0] == 'north'):
+                if(action.args[0] == 'north'): 
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y-1))):
                         creature.position = Position(creature.position.x, creature.position.y-1)
                     creature.command_queue.remove(action) # remove the action after we process it.
-                if(action.args[0] == 'east'):
+                if(action.args[0] == 'east'): 
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x+1, creature.position.y))):
                         creature.position = Position(creature.position.x+1, creature.position.y)
                     creature.command_queue.remove(action) # remove the action after we process it.
@@ -150,16 +150,16 @@ class Server(MastermindServerTCP):
         # for every 1 city size it's 12 tiles across and high
         for j in range(city_size*12):
             for i in range(city_size*12):
-                if(server.worldmap.get_chunk_by_position(Position(i * server.worldmap.chunk_size + 1 , j * server.worldmap.chunk_size + 1)).was_loaded == 'no'):
+                if(server.worldmap.get_chunk_by_position(Position(i * server.worldmap.chunk_size[0] + 1 , j * server.worldmap.chunk_size[1] + 1)).was_loaded == 'no'):
                     if(city_layout[i][j] == 'r'):
                         json_file = random.choice(os.listdir('./data/json/mapgen/residential/'))
-                        server.worldmap.build_json_building_at_position('./data/json/mapgen/residential/' + json_file, Position(i * server.worldmap.chunk_size + 1 , j * server.worldmap.chunk_size + 1))
+                        server.worldmap.build_json_building_at_position('./data/json/mapgen/residential/' + json_file, Position(i * server.worldmap.chunk_size[0] + 1 , j * server.worldmap.chunk_size[1] + 1))
                     elif(city_layout[i][j] == 'c'):
                         json_file = random.choice(os.listdir('./data/json/mapgen/commercial/'))
-                        server.worldmap.build_json_building_at_position('./data/json/mapgen/commercial/' + json_file, Position(i * server.worldmap.chunk_size + 1 , j * server.worldmap.chunk_size + 1))
+                        server.worldmap.build_json_building_at_position('./data/json/mapgen/commercial/' + json_file, Position(i * server.worldmap.chunk_size[0] + 1 , j * server.worldmap.chunk_size[1] + 1))
                     elif(city_layout[i][j] == 'i'):
                         json_file = random.choice(os.listdir('./data/json/mapgen/industrial/'))
-                        server.worldmap.build_json_building_at_position('./data/json/mapgen/industrial/' + json_file, Position(i * server.worldmap.chunk_size + 1 , j * server.worldmap.chunk_size + 1))
+                        server.worldmap.build_json_building_at_position('./data/json/mapgen/industrial/' + json_file, Position(i * server.worldmap.chunk_size[0] + 1 , j * server.worldmap.chunk_size[1] + 1))
                     elif(city_layout[i][j] == 'R'): # complex enough to choose the right rotation.
                         attached_roads = 0
                         try:
@@ -191,7 +191,7 @@ class Server(MastermindServerTCP):
                                     json_file = './data/json/mapgen/road/city_road_v.json'
                                 elif(city_layout[int(i)][int(j-1)] == 'R'):
                                     json_file = './data/json/mapgen/road/city_road_v.json'
-                            server.worldmap.build_json_building_at_position(json_file, Position(i * server.worldmap.chunk_size + 1 , j * server.worldmap.chunk_size + 1))
+                            server.worldmap.build_json_building_at_position(json_file, Position(i * server.worldmap.chunk_size[0] + 1 , j * server.worldmap.chunk_size[1] + 1))
                         except:
                             #TODO: fix this blatant hack to account for coordinates outside the city layout.
                             pass

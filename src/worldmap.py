@@ -12,27 +12,29 @@ from src.position import Position
 
 class Chunk:
     def __init__(self, x, y, chunk_size): # x, y relate to it's position on the world map.
+        #print(chunk_size)
         self.is_dirty = True # set this to true to have the changes updated on the disk, default is True so worldgen writes it to disk
         self.was_loaded = 'no'
         self.map = dict()
-        for i in range(chunk_size):
+        for i in range(chunk_size[0]):
             self.map[i] = dict()
-            for j in range(chunk_size): 
-                self.map[i][j] = Terrain('t_grass', Position((x*chunk_size)+i, (y*chunk_size)+j))
-                #print('made',  Position((x*chunk_size)+i, (y*chunk_size)+j))
+            for j in range(chunk_size[1]): 
+                self.map[i][j] = Terrain('t_grass', Position((x * chunk_size[0]) + i, (y * chunk_size[1]) + j))
 
         self.creatures = list() # individual x, y
         self.items = list() # grabable items individual x, y
-        self.objects = list() # doors, altars, etc. individual x, y
+        self.furnitures = list() # doors, altars, etc. individual x, y
         self.players = list() # current active players on this chunk individual x, y
        
 
 class Worldmap:
-    # let's make the world map and fill it with rooms!
+    def move_object_from_position_to_position(self, obj, obj_position, position):
+        pass
 
+    # let's make the world map and fill it with rooms!
     def __init__(self, WORLD_SIZE): # size in chunks along one axis.
         self.WORLDMAP = dict() # dict of dicts for chunks
-        self.chunk_size = 13 # size of the chunk, leave it hardcoded here. 
+        self.chunk_size = (51,27) # size of the chunk, leave it hardcoded here. 
         self.WORLD_SIZE = WORLD_SIZE
         start = time.time()
         #TODO: only need to load the chunks where there are actual players present in memory after generation.
@@ -97,8 +99,8 @@ class Worldmap:
         
 
     def get_chunk_by_position(self, position):
-        x = int(position.x / self.chunk_size)
-        y = int(position.y / self.chunk_size)
+        x = int(position.x / self.chunk_size[0])
+        y = int(position.y / self.chunk_size[1])
 
         return self.WORLDMAP[x][y]
     
@@ -156,15 +158,15 @@ class Worldmap:
         #print('Looking for position: ' + str(position))
         x_count = 0 #
         x = position.x
-        while(x >= self.chunk_size):
-            x = x - self.chunk_size
+        while(x >= self.chunk_size[0]):
+            x = x - self.chunk_size[0]
             x_count = x_count + 1
 
         y_count = 0 #
         y = position.y
         # worldmap[x][y].tiles
-        while(y >= self.chunk_size):
-            y = y - self.chunk_size
+        while(y >= self.chunk_size[1]):
+            y = y - self.chunk_size[1]
             y_count = y_count + 1
 
 
@@ -181,28 +183,6 @@ class Worldmap:
 
 
 
-        '''try:except Exception:
-            print('~could not find tile at position ' + str(position) + ' making a new chunk: ' + str(x_count) + '_' + str(y_count)
-
-            self.WORLDMAP[x_count][y_count] = Chunk(x_count, y_count, self.chunk_size)
-            path = str('./worlds/default/' + str(x_count) + '_' + str(y_count) + '.chunk')
-            with open(path, 'wb') as fp:
-                pickle.dump(self.WORLDMAP[x_count][y_count], fp)
-                #print('created chunk.' + str(self.WORLDMAP[x_count][y_count]))
-
-                for tile in self.WORLDMAP[x_count][y_count].tiles:
-                    if tile['position'] == position:
-                        #print('found ' + str(position))
-                        return tile
-                else:
-                    print('couldn\'t find tile')
-
-
-        for tile in self.WORLDMAP[x_count][y_count].tiles:
-            if tile['position'] == position:
-                #print('~~got position: ' + str(position))
-                #print('------------------')
-                return tile'''
     
     def generate_city(self, size):
         size = int(size * 12) # multiplier
