@@ -36,7 +36,7 @@ class Server(MastermindServerTCP):
                     else:
                         print('player doesnt exist yet.')
                         tmp_player = Player(2,2, str(data.ident))
-                        self.worldmap.add_player_to_worldmap(tmp_player, Position(2,2))
+                        self.worldmap.add_player_to_worldmap(tmp_player, Position(10,10))
 
                     print('Player ' + str(data.ident) + ' entered the world at position ' + str(tmp_player.position))
                     self.callback_client_send(connection_object, tmp_player)
@@ -46,7 +46,10 @@ class Server(MastermindServerTCP):
 
             # all the commands that are actions need to be put into the command_queue then we will loop through the queue each turn and process the actions.
             if(data.command == 'move'):
-               tmp_player.command_queue.append(Action(tmp_player, 'move', [data.args[0]]))
+                tmp_player = self.worldmap.get_player(data.ident) # by 'name'
+                tmp_player.command_queue.append(Action(tmp_player, 'move', [data.args[0]]))
+                tmp_chunk = self.worldmap.get_chunk_by_player(data.ident)
+                self.callback_client_send(connection_object, tmp_chunk)
 
             if(data.command == 'request_chunk'):
                 # find the chunk the player is on and send it to them.
@@ -98,29 +101,27 @@ class Server(MastermindServerTCP):
             if(action.action_type == 'move'):
                 actions_to_take = actions_to_take - 1 # moving costs 1 action point.
                 if(action.args[0] == 'south'):
-                    if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y+1))):
-                        creature.position = Position(creature.position.x, creature.position.y+1)
+                    self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y+1))
                     creature.command_queue.remove(action) # remove the action after we process it.
                 if(action.args[0] == 'north'): 
-                    if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y-1))):
-                        creature.position = Position(creature.position.x, creature.position.y-1)
+                    self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y-1))
                     creature.command_queue.remove(action) # remove the action after we process it.
                 if(action.args[0] == 'east'): 
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x+1, creature.position.y))):
-                        creature.position = Position(creature.position.x+1, creature.position.y)
-                    creature.command_queue.remove(action) # remove the action after we process it.
+                        #creature.position = Position(creature.position.x+1, creature.position.y)
+                        creature.command_queue.remove(action) # remove the action after we process it.
                 if(action.args[0] == 'west'):
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x-1, creature.position.y))):
-                        creature.position = Position(creature.position.x-1, creature.position.y)
-                    creature.command_queue.remove(action) # remove the action after we process it.
+                        #creature.position = Position(creature.position.x-1, creature.position.y)
+                        creature.command_queue.remove(action) # remove the action after we process it.
                 if(action.args[0] == 'up'):
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y+1))):
-                        creature.position = Position(creature.position.x, creature.position.y+1)
-                    creature.command_queue.remove(action) # remove the action after we process it.
+                        #creature.position = Position(creature.position.x, creature.position.y+1)
+                        creature.command_queue.remove(action) # remove the action after we process it.
                 if(action.args[0] == 'down'):
                     if(self.worldmap.move_object_from_position_to_position(creature, creature.position, Position(creature.position.x, creature.position.y-1))):
-                        creature.position = Position(creature.position.x, creature.position.y-1)
-                    creature.command_queue.remove(action) # remove the action after we process it.
+                        #creature.position = Position(creature.position.x, creature.position.y-1)
+                        creature.command_queue.remove(action) # remove the action after we process it.
 
     # this function handles overseeing all creature movement, attacks, and interactions
     def compute_turn(self):

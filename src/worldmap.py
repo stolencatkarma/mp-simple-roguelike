@@ -29,7 +29,49 @@ class Chunk:
 
 class Worldmap:
     def move_object_from_position_to_position(self, obj, obj_position, position):
-        pass
+        from_chunk = self.get_chunk_by_position(obj_position)
+        to_chunk = self.get_chunk_by_position(position)
+        from_chunk.is_dirty = True
+        to_chunk.is_dirty = True
+
+        if(self.get_object_at_position(position) == None):
+            obj.position = position
+            return True
+        
+        '''
+        #print(self.get_chunk_by_position(to_position).is_dirty)
+        #print(self.get_chunk_by_position(to_position).is_dirty)
+        if isinstance(obj, (Creature, Player, Monster)):
+            # print('moving ' + str(obj) + ' from ' + str(from_position)+ ' to ' + str(to_position))
+            if to_tile['terrain'].impassable:
+                print('tile is impassable')
+                return False
+            if to_tile['creature'] is not None: # don't replace creatures in the tile if we move over them.
+                print('creature is impassable')
+                return False
+            to_tile['creature'] = obj
+            from_tile['creature'] = None
+            return True
+        if isinstance(obj, Terrain):
+            to_tile['terrain'] = obj
+            return True
+        if obj is Item:
+            print('Moving ' + str(obj) + ' from ' + str(from_tile['position']) + ' to ' + str(to_tile['position']))
+            if obj in from_tile['items'][:]: # iterate a copy to remove properly.
+                #items = tile['item'] # which is []
+                from_tile['items'].remove(obj)
+                to_tile['items'].append(obj)
+            else:
+                pass
+            return True
+        if obj is Furniture:
+            if to_tile['furniture'] is not None:
+                print('already furniture there.')
+                return False
+            to_tile['furniture'] = obj
+            from_tile['furniture'] = None
+            return True
+        #TODO: the rest of the types.'''
 
     # let's make the world map and fill it with rooms!
     def __init__(self, WORLD_SIZE): # size in chunks along one axis.
@@ -99,10 +141,44 @@ class Worldmap:
         
 
     def get_chunk_by_position(self, position):
-        x = int(position.x / self.chunk_size[0])
-        y = int(position.y / self.chunk_size[1])
+        #print('Looking for position: ' + str(position))
+        x_count = 0 #
+        x = position.x
+        while(x >= self.chunk_size[0]):
+            x = x - self.chunk_size[0]
+            x_count = x_count + 1
 
-        return self.WORLDMAP[x][y]
+        y_count = 0 #
+        y = position.y
+        # worldmap[x][y].tiles
+        while(y >= self.chunk_size[1]):
+            y = y - self.chunk_size[1]
+            y_count = y_count + 1
+
+        return self.WORLDMAP[x_count][y_count]
+    
+    def get_object_at_position(self, position): # for everything but terrain
+        _chunk = self.get_chunk_by_position(position)
+        for player in _chunk.players:
+            if(player.position == position):
+                return player
+        
+        for furniture in _chunk.furnitures:
+            if(furniture.position == position):
+                return furniture
+        
+        for item in _chunk.items:
+            if(item.position == position):
+                return item
+        
+        for creature in _chunk.creatures:
+            if(creature.position == position):
+                return item
+        
+        return None # found no object as position
+
+
+
     
     def build_json_building_at_position(self, filename, position): # applys the json file to world coordinates. can be done over multiple chunks.
         print('building: ' + str(filename) + ' at ' + str(position))
@@ -137,7 +213,9 @@ class Worldmap:
         #print('Building '+ str(filename) + ' took: ' + str(duration) + ' seconds.')
 
     def put_object_at_position(self, obj, position): # attempts to take any object (creature, item, etc.) and put it in the right spot in the WORLDMAP
-        #TODO: check if something is already there. right now it just replaces it
+        if(self.get_object_at_position(position) is not None):
+            return False
+
         chunk = self.get_chunk_by_position(position)
         chunk.is_dirty = True
         #print(tile)
@@ -155,7 +233,7 @@ class Worldmap:
             return
     
     def get_terrain_by_position(self, position):
-        #print('Looking for position: ' + str(position))
+        '''#print('Looking for position: ' + str(position))
         x_count = 0 #
         x = position.x
         while(x >= self.chunk_size[0]):
@@ -167,8 +245,7 @@ class Worldmap:
         # worldmap[x][y].tiles
         while(y >= self.chunk_size[1]):
             y = y - self.chunk_size[1]
-            y_count = y_count + 1
-
+            y_count = y_count + 1'''
 
         chunk = self.get_chunk_by_position(position)
 

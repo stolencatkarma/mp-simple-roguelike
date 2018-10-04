@@ -87,6 +87,9 @@ class Client(MastermindClientTCP): # extends MastermindClientTCP
         def on_key_press(symbol, modifiers):
             if symbol == KEY.RETURN:
                 print('return')
+            if symbol == KEY.W:
+                command = Command(args.name, 'move', ['north'])
+                client.send(command)
 
     def convert_position_to_local_coords(self, position):
         x = position.x
@@ -115,7 +118,8 @@ class Client(MastermindClientTCP): # extends MastermindClientTCP
                 i, j = self.convert_position_to_local_coords(player.position)
                 self.map_grid[j,i].set_image(pyglet.resource.texture(player.ident))
             
-            #self.map_grid[j,i]._draw()
+            print(pyglet.clock.get_fps())
+
 
                     
         else:
